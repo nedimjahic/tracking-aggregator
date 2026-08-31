@@ -1,0 +1,126 @@
+openapi: 3.0.3
+info:
+  title: Tracking Aggregator API
+  description: Aggregates shipment tracking across multiple courier services
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+
+paths:
+  /api/track/{trackingNumber}:
+    get:
+      operationId: trackShipment
+      summary: Track a shipment by tracking number
+      description: >
+        Auto-detects the courier from the tracking number format,
+        queries the courier API, and returns shipment status and events.
+      parameters:
+        - name: trackingNumber
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+          description: The tracking number to look up
+      responses:
+        "200":
+          description: Shipment found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackingResult"
+        "400":
+          description: Courier could not be detected from tracking number
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackingError"
+        "404":
+          description: No shipment found for this tracking number
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackingError"
+
+components:
+  schemas:
+    Courier:
+      type: string
+      enum:
+        - DHL
+        - GLS
+        - DPD
+        - UPS
+        - FEDEX
+        - USPS
+
+    ShipmentStatus:
+      type: string
+      enum:
+        - PENDING
+        - PICKED_UP
+        - IN_TRANSIT
+        - OUT_FOR_DELIVERY
+        - DELIVERED
+        - FAILED_ATTEMPT
+        - RETURNED
+        - UNKNOWN
+
+    TrackingEvent:
+      type: object
+      required:
+        - timestamp
+        - description
+        - status
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        location:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: "#/components/schemas/ShipmentStatus"
+
+    TrackingResult:
+      type: object
+      required:
+        - trackingNumber
+        - courier
+        - status
+        - events
+      properties:
+        trackingNumber:
+          type: string
+        courier:
+          $ref: "#/components/schemas/Courier"
+        status:
+          $ref: "#/components/schemas/ShipmentStatus"
+        estimatedDelivery:
+          type: string
+          format: date
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrackingEvent"
+
+    TrackingError:
+      type: object
+      required:
+        - error
+        - message
+        - trackingNumber
+      properties:
+        error:
+          type: string
+          enum:
+            - COURIER_NOT_DETECTED
+            - TRACKING_NOT_FOUND
+        message:
+          type: string
+        trackingNumber:
+          type: string

@@ -1,0 +1,39 @@
+quarkus:
+  application:
+    name: tracking-aggregator
+
+  http:
+    port: 8080
+    cors:
+      ~: true
+      origins: http://localhost:5173
+      methods: GET,POST,OPTIONS
+      headers: Content-Type
+
+  datasource:
+    db-kind: postgresql
+    username: tracking
+    password: tracking
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/tracking_aggregator
+
+  hibernate-orm:
+    log:
+      sql: true
+
+  flyway:
+    migrate-at-start: true
+    baseline-on-migrate: true
+
+  smallrye-openapi:
+    path: /q/openapi
+  swagger-ui:
+    always-include: true
+
+"%prod":
+  quarkus:
+    datasource:
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      jdbc:
+        url: ${DB_URL}

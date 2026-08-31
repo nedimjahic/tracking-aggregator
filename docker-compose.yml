@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tracking-aggregator-db
+    environment:
+      POSTGRES_DB: tracking_aggregator
+      POSTGRES_USER: tracking
+      POSTGRES_PASSWORD: tracking
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

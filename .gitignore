@@ -1,0 +1,24 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Java / Maven
+backend/target/
+*.class
+*.jar
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Generated API code (regenerated from openapi.yml)
+frontend/src/api/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
