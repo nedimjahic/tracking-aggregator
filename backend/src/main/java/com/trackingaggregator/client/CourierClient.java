@@ -9,5 +9,9 @@ public interface CourierClient {
 
     Courier getCourier();
 
+    default boolean isEnabled() {
+        return true;
+    }
+
     Optional<TrackingResult> track(String trackingNumber);
 }

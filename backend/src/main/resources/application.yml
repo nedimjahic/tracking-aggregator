@@ -17,10 +17,6 @@ quarkus:
     jdbc:
       url: jdbc:postgresql://localhost:5432/tracking_aggregator
 
-  hibernate-orm:
-    log:
-      sql: true
-
   flyway:
     migrate-at-start: true
     baseline-on-migrate: true
@@ -30,6 +26,38 @@ quarkus:
   swagger-ui:
     always-include: true
 
+  rest-client:
+    dhl-api:
+      url: https://api-eu.dhl.com
+      connect-timeout: 5000
+      read-timeout: 10000
+    ups-api:
+      url: https://onlinetools.ups.com
+      connect-timeout: 5000
+      read-timeout: 10000
+    fedex-api:
+      url: https://apis.fedex.com
+      connect-timeout: 5000
+      read-timeout: 10000
+    usps-api:
+      url: https://api.usps.com
+      connect-timeout: 5000
+      read-timeout: 10000
+    gls-api:
+      url: https://api.gls-group.eu
+      connect-timeout: 5000
+      read-timeout: 10000
+    dpd-api:
+      url: https://tracking.dpd.de
+      connect-timeout: 5000
+      read-timeout: 10000
+
+"%dev":
+  quarkus:
+    hibernate-orm:
+      log:
+        sql: true
+
 "%prod":
   quarkus:
     datasource:
@@ -37,3 +65,40 @@ quarkus:
       password: ${DB_PASSWORD}
       jdbc:
         url: ${DB_URL}
+
+courier:
+  dhl:
+    enabled: true
+    api-key: ${DHL_API_KEY:}
+  ups:
+    enabled: true
+    client-id: ${UPS_CLIENT_ID:}
+    client-secret: ${UPS_CLIENT_SECRET:}
+    token-url: https://onlinetools.ups.com/security/v1/oauth/token
+  fedex:
+    enabled: true
+    client-id: ${FEDEX_CLIENT_ID:}
+    client-secret: ${FEDEX_CLIENT_SECRET:}
+    token-url: https://apis.fedex.com/oauth/token
+  usps:
+    enabled: true
+    client-id: ${USPS_CLIENT_ID:}
+    client-secret: ${USPS_CLIENT_SECRET:}
+    token-url: https://api.usps.com/oauth2/v3/token
+  gls:
+    enabled: false
+    api-key: ${GLS_API_KEY:}
+  dpd:
+    enabled: false
+    api-key: ${DPD_API_KEY:}
+
+tracking:
+  cache:
+    ttl:
+      delivered: 1440
+      in-transit: 30
+      out-for-delivery: 10
+      failed-attempt: 30
+      picked-up: 60
+      returned: 1440
+      default: 15
