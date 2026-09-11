@@ -1,0 +1,15 @@
+{
+  "trackingNumber": "12345678901234567890",
+  "statusCategory": "Delivered",
+  "statusSummary": "Your item was delivered.",
+  "expectedDeliveryDate": "2026-09-15",
+  "trackingEvents": [
+    {
+      "eventTimestamp": "2026-09-10T14:30:00-04:00",
+      "eventCity": "New York",
+      "eventState": "NY",
+      "eventDescription": "Arrived at facility",
+      "eventType": "In Transit"
+    }
+  ]
+}

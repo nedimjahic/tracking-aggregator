@@ -9,7 +9,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
@@ -61,7 +63,7 @@ public class DHLResponseMapper {
     private OffsetDateTime parseTimestamp(String timestamp) {
         if (timestamp == null) return null;
         try {
-            return OffsetDateTime.parse(timestamp);
+            return parseOffsetOrLocal(timestamp);
         } catch (DateTimeParseException e) {
             return null;
         }
@@ -71,11 +73,20 @@ public class DHLResponseMapper {
         if (date == null) return null;
         try {
             if (date.length() > 10) {
-                return OffsetDateTime.parse(date).toLocalDate();
+                return parseOffsetOrLocal(date).toLocalDate();
             }
             return LocalDate.parse(date);
         } catch (DateTimeParseException e) {
             return null;
+        }
+    }
+
+    private OffsetDateTime parseOffsetOrLocal(String dateTime) {
+        try {
+            return OffsetDateTime.parse(dateTime);
+        } catch (DateTimeParseException e) {
+            // DHL sometimes omits the offset entirely; assume UTC in that case.
+            return LocalDateTime.parse(dateTime).atOffset(ZoneOffset.UTC);
         }
     }
 }

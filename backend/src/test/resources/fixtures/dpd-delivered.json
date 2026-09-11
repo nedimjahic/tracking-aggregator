@@ -1,0 +1,21 @@
+{
+  "parcellifecycleResponse": {
+    "parcelLifeCycleData": {
+      "shipmentInfo": {
+        "status": "Delivered"
+      },
+      "scanInfo": {
+        "scan": [
+          {
+            "date": "25/12/2026",
+            "time": "14:30:00",
+            "scanDescription": {
+              "content": "Parcel delivered"
+            },
+            "scanType": "DELIVERED"
+          }
+        ]
+      }
+    }
+  }
+}

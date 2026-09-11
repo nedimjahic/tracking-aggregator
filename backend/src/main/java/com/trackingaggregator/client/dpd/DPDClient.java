@@ -6,6 +6,7 @@ import com.trackingaggregator.model.Courier;
 import com.trackingaggregator.model.TrackingResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
@@ -54,7 +55,9 @@ public class DPDClient implements CourierClient {
             if (e.getResponse().getStatus() == 404) {
                 return Optional.empty();
             }
-            throw new CourierApiException(Courier.DPD, trackingNumber, e.getResponse().getStatus(), e);
+            throw CourierApiException.fromWebApplicationException(Courier.DPD, trackingNumber, e);
+        } catch (ProcessingException e) {
+            throw CourierApiException.fromTransportFailure(Courier.DPD, trackingNumber, e);
         }
     }
 }

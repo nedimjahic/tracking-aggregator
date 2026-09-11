@@ -7,6 +7,7 @@ import com.trackingaggregator.model.TrackingResult;
 import com.trackingaggregator.service.OAuthTokenService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
@@ -76,7 +77,9 @@ public class USPSClient implements CourierClient {
             if (e.getResponse().getStatus() == 401) {
                 oAuthTokenService.invalidate("usps");
             }
-            throw new CourierApiException(Courier.USPS, trackingNumber, e.getResponse().getStatus(), e);
+            throw CourierApiException.fromWebApplicationException(Courier.USPS, trackingNumber, e);
+        } catch (ProcessingException e) {
+            throw CourierApiException.fromTransportFailure(Courier.USPS, trackingNumber, e);
         }
     }
 }

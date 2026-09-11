@@ -1,0 +1,59 @@
+quarkus:
+  # datasource url/username/password and the rest-client urls are supplied at runtime by
+  # CourierApiTestResource. They are deliberately NOT set here: the main application.yml
+  # hardcodes a localhost Postgres url, and a test-resource override is the only config
+  # source guaranteed to outrank it. See risk R7 in the test plan.
+  hibernate-orm:
+    schema-management:
+      strategy: validate      # entity <-> Flyway drift fails the whole suite at boot
+  flyway:
+    migrate-at-start: true
+    baseline-on-migrate: false
+  log:
+    category:
+      "com.trackingaggregator":
+        level: DEBUG
+      "org.testcontainers":
+        level: WARN
+      "com.github.dockerjava":
+        level: WARN
+
+# Disable Retry/Timeout/CircuitBreaker for the whole suite.
+# Without this, the ~15 client failure tests trip the shared circuit breaker and later
+# tests fail with CircuitBreakerOpenException in an order-dependent way. Re-enabled in
+# exactly one place: DHLClientRetryTest via RetryEnabledProfile. See risk R3.
+MP_Fault_Tolerance_NonFallback_Enabled: false
+
+courier:
+  dhl:
+    enabled: true
+    api-key: test-dhl-key
+  ups:
+    enabled: true
+    client-id: test-ups-id
+    client-secret: test-ups-secret
+  fedex:
+    enabled: true
+    client-id: test-fedex-id
+    client-secret: test-fedex-secret
+  usps:
+    enabled: true
+    client-id: test-usps-id
+    client-secret: test-usps-secret
+  gls:
+    enabled: true          # main config has false, which would make the client unreachable
+    api-key: test-gls-key
+  dpd:
+    enabled: true          # main config has false
+    api-key: test-dpd-key
+
+tracking:
+  cache:
+    ttl:
+      delivered: 1440
+      in-transit: 30
+      out-for-delivery: 10
+      failed-attempt: 30
+      picked-up: 60
+      returned: 1440
+      default: 15

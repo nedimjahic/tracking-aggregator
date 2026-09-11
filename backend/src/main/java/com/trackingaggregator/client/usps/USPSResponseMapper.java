@@ -22,7 +22,7 @@ public class USPSResponseMapper {
     StatusMapper statusMapper;
 
     public Optional<TrackingResult> map(String trackingNumber, USPSTrackingResponse response) {
-        if (response == null) {
+        if (response == null || response.trackingNumber() == null) {
             return Optional.empty();
         }
 

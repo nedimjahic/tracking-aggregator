@@ -16,6 +16,11 @@
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.33.3.1</quarkus.platform.version>
         <surefire-plugin.version>3.5.0</surefire-plugin.version>
+        <!-- Test-only versions. quarkus-bom manages junit, mockito and rest-assured,
+             but not these three, so they are pinned explicitly. -->
+        <assertj.version>3.27.3</assertj.version>
+        <testcontainers.version>1.20.6</testcontainers.version>
+        <wiremock.version>3.13.1</wiremock.version>
     </properties>
 
     <dependencyManagement>
@@ -24,6 +29,14 @@
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>${quarkus.platform.artifact-id}</artifactId>
                 <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Keeps testcontainers-core, -postgresql and -junit-jupiter on one version. -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -93,15 +106,59 @@
             <artifactId>quarkus-smallrye-fault-tolerance</artifactId>
         </dependency>
 
-        <!-- Test -->
+        <!-- Test. NOTE: quarkus-junit5 / quarkus-junit5-mockito are the pre-3.31 names
+             and Maven emits a relocation warning for each; the current names are used. -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
+            <artifactId>quarkus-junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito + @InjectMock/@InjectSpy for @QuarkusTest (version from quarkus-bom) -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- MockitoExtension for plain (non-Quarkus) unit tests -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Fluent assertions -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Real Postgres for the native ON CONFLICT query + Flyway (versions from testcontainers-bom) -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--
+          HTTP stubbing for the 6 REST clients + the OAuth token endpoint.
+          Must be wiremock-standalone (not wiremock): the standalone jar shades
+          Jetty/Jackson/Guava so it does not collide with Quarkus's own Jackson/Netty
+          on the test classpath.
+        -->
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -136,8 +193,17 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
                 <configuration>
+                    <!--
+                      @{argLine} MUST come first: the Quarkus Maven extension injects the
+                      JVM parameters @QuarkusTest needs through that property, and drops
+                      them with a warning if it is absent.
+                      -XX:+EnableDynamicAgentLoading silences/permits Mockito
+                      self-attaching its inline mock maker agent (needed by mockStatic).
+                    -->
+                    <argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

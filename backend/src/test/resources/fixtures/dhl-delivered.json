@@ -1,0 +1,33 @@
+{
+  "shipments": [
+    {
+      "status": {
+        "statusCode": "delivered",
+        "timestamp": "2026-09-15T09:05:00+02:00"
+      },
+      "estimatedTimeOfDelivery": "2026-09-15",
+      "events": [
+        {
+          "timestamp": "2026-09-10T14:30:00+02:00",
+          "description": "Processed at facility",
+          "statusCode": "transit",
+          "location": {
+            "address": {
+              "addressLocality": "Frankfurt"
+            }
+          }
+        },
+        {
+          "timestamp": "2026-09-15T09:05:00+02:00",
+          "description": "Delivered",
+          "statusCode": "delivered",
+          "location": {
+            "address": {
+              "addressLocality": "Berlin"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

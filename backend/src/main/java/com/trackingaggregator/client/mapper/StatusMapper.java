@@ -61,12 +61,18 @@ public class StatusMapper {
     public ShipmentStatus mapFromDescription(String description) {
         if (description == null) return ShipmentStatus.UNKNOWN;
         String lower = description.toLowerCase();
-        if (lower.contains("delivered")) return ShipmentStatus.DELIVERED;
+        // "returned" is checked before the failure/exception keywords so a description
+        // like "Returned after failed delivery" is reported as RETURNED, not FAILED_ATTEMPT.
+        if (lower.contains("returned")) return ShipmentStatus.RETURNED;
+        // Failure/exception indicators - including a negated "not delivered" - are checked
+        // before "delivered" and "out for delivery" so they are not shadowed by those words.
+        if (lower.contains("not delivered") || lower.contains("failed") || lower.contains("exception")) {
+            return ShipmentStatus.FAILED_ATTEMPT;
+        }
         if (lower.contains("out for delivery")) return ShipmentStatus.OUT_FOR_DELIVERY;
+        if (lower.contains("delivered")) return ShipmentStatus.DELIVERED;
         if (lower.contains("transit") || lower.contains("in transit")) return ShipmentStatus.IN_TRANSIT;
         if (lower.contains("picked up") || lower.contains("pickup") || lower.contains("collected")) return ShipmentStatus.PICKED_UP;
-        if (lower.contains("returned")) return ShipmentStatus.RETURNED;
-        if (lower.contains("failed") || lower.contains("exception")) return ShipmentStatus.FAILED_ATTEMPT;
         return ShipmentStatus.UNKNOWN;
     }
 }

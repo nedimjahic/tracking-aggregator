@@ -82,7 +82,11 @@ public class OAuthTokenService {
             }
 
             JsonNode json = objectMapper.readTree(response.body());
-            String accessToken = json.get("access_token").asText();
+            String accessToken = json.path("access_token").asText(null);
+            if (accessToken == null) {
+                // Do not include the response body here - it may carry secrets.
+                throw new RuntimeException("OAuth token response for %s had no access_token".formatted(courierKey));
+            }
             int expiresIn = json.has("expires_in") ? json.get("expires_in").asInt() : 3600;
 
             CachedToken token = new CachedToken(accessToken, Instant.now().plusSeconds(expiresIn));

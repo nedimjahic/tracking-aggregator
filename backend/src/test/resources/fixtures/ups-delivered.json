@@ -1,0 +1,38 @@
+{
+  "trackResponse": {
+    "shipment": [
+      {
+        "package": [
+          {
+            "deliveryDate": [
+              { "date": "20260915" }
+            ],
+            "currentStatus": {
+              "description": "Delivered",
+              "code": "011",
+              "type": "D"
+            },
+            "activity": [
+              {
+                "date": "20260910",
+                "time": "143000",
+                "location": {
+                  "address": {
+                    "city": "Louisville",
+                    "stateProvince": "KY",
+                    "country": "US"
+                  }
+                },
+                "status": {
+                  "description": "Arrived at facility",
+                  "code": "AR",
+                  "type": "I"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "output": {
+    "completeTrackResults": [
+      {
+        "trackResults": [
+          {
+            "latestStatusDetail": {
+              "code": "DL",
+              "description": "Delivered",
+              "derivedCode": "DL"
+            },
+            "estimatedDeliveryTimeWindow": {
+              "window": {
+                "ends": "2026-09-15T12:00:00-05:00"
+              }
+            },
+            "scanEvents": [
+              {
+                "date": "2026-09-10T14:30:00-05:00",
+                "eventDescription": "Arrived at FedEx location",
+                "derivedStatus": "IT",
+                "scanLocation": {
+                  "city": "MEMPHIS",
+                  "stateOrProvinceCode": "TN",
+                  "countryCode": "US"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

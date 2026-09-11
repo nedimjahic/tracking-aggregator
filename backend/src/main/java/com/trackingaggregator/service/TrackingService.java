@@ -4,6 +4,7 @@ import com.trackingaggregator.client.CourierApiException;
 import com.trackingaggregator.client.CourierClient;
 import com.trackingaggregator.entity.TrackingQuery;
 import com.trackingaggregator.model.Courier;
+import com.trackingaggregator.model.ShipmentStatus;
 import com.trackingaggregator.model.TrackingResult;
 import io.quarkus.narayana.jta.QuarkusTransaction;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -34,7 +35,10 @@ public class TrackingService {
         this.detectorService = detectorService;
         this.cacheService = cacheService;
         this.clients = clientInstances.stream()
-                .collect(Collectors.toMap(CourierClient::getCourier, Function.identity()));
+                .collect(Collectors.toMap(CourierClient::getCourier, Function.identity(), (a, b) -> {
+                    throw new IllegalStateException("Duplicate CourierClient registered for %s: %s and %s"
+                            .formatted(a.getCourier(), a.getClass().getName(), b.getClass().getName()));
+                }));
     }
 
     public Optional<Courier> detectCourier(String trackingNumber) {
@@ -56,6 +60,12 @@ public class TrackingService {
             Optional<TrackingResult> result = client.track(trackingNumber);
 
             result.ifPresent(r -> {
+                if (r.getStatus() == null) {
+                    // A courier client returning a null status is treated as unknown rather
+                    // than allowed to NPE partway through caching/analytics.
+                    r.status(ShipmentStatus.UNKNOWN);
+                }
+
                 cacheService.put(trackingNumber, courier, r);
 
                 QuarkusTransaction.requiringNew().run(() -> {
